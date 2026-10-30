@@ -1,12 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+set -eu
 
-pyinstaller \
-    --name="keylock" \
-    --onefile \
-    --strip \
-    --paths=env/Lib/site-packages \
-    --add-data="assets:assets" \
-    --noconsole \
-    --icon=assets/icon.ico \
-    --exclude-module=numpy \
-    main.py
+if [ -x ".venv/bin/python" ]; then
+    PYTHON=".venv/bin/python"
+else
+    PYTHON="python3"
+fi
+
+exec "$PYTHON" build.py

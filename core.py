@@ -1,5 +1,10 @@
+import sys
+
 import pynput
 from pynput.keyboard import HotKey, Key, KeyCode
+
+if sys.platform == "darwin":
+    import Quartz
 
 mouse_listener = None
 shortcut_listener = None
@@ -38,9 +43,18 @@ def parse_shortcut(shortcut_str):
 def start_shortcut_listener():
     global shortcut_listener
     if shortcut_listener is None:
-        shortcut_listener = pynput.keyboard.Listener(
-            win32_event_filter=keyboard_event_filter
-        )
+        if sys.platform == "win32":
+            shortcut_listener = pynput.keyboard.Listener(
+                win32_event_filter=keyboard_event_filter
+            )
+        elif sys.platform == "darwin":
+            shortcut_listener = pynput.keyboard.Listener(
+                darwin_intercept=mac_keyboard_intercept
+            )
+        else:
+            shortcut_listener = pynput.keyboard.Listener(
+                on_press=on_press, on_release=on_release
+            )
         shortcut_listener.start()
         print("Shortcut listener started.")
 
@@ -72,9 +86,16 @@ def stop_keyboard():
 def start_mouse():
     global mouse_listener, mouse_locked
     if mouse_listener is None:
-        mouse_listener = pynput.mouse.Listener(
-            win32_event_filter=mouse_event_filter
-        )
+        if sys.platform == "win32":
+            mouse_listener = pynput.mouse.Listener(
+                win32_event_filter=mouse_event_filter
+            )
+        elif sys.platform == "darwin":
+            mouse_listener = pynput.mouse.Listener(
+                darwin_intercept=mac_mouse_intercept
+            )
+        else:
+            mouse_listener = pynput.mouse.Listener(suppress=True)
         mouse_listener.start()
     mouse_locked = True
     print("Mouse locked.")
@@ -181,3 +202,68 @@ def mouse_event_filter(message, data):
     if mouse_locked and not data.flags & 0x03:  # LLMHF_INJECTED | LOWER_IL
         mouse_listener.suppress_event()
     return True
+
+
+def mac_keyboard_intercept(event_type, event):
+    """Handle macOS shortcuts and synchronously suppress locked key events."""
+    if shortcut_listener is None:
+        return event
+
+    try:
+        key = shortcut_listener.canonical(shortcut_listener._event_to_key(event))
+    except (AttributeError, IndexError, OSError):
+        return event
+
+    if key is None:
+        return event
+
+    if event_type == Quartz.kCGEventKeyDown:
+        _press_hotkeys(key)
+    elif event_type == Quartz.kCGEventKeyUp:
+        _release_hotkeys(key)
+    elif event_type == Quartz.kCGEventFlagsChanged:
+        flags = Quartz.CGEventGetFlags(event)
+        modifier_flag = shortcut_listener._MODIFIER_FLAGS.get(key, 0)
+        if modifier_flag and flags & modifier_flag:
+            _press_hotkeys(key)
+        else:
+            _release_hotkeys(key)
+
+    if keyboard_locked and key not in unlock_event_keys:
+        return None
+    return event
+
+
+def mac_mouse_intercept(event_type, event):
+    """Suppress mouse events while locked on macOS."""
+    return None if mouse_locked else event
+
+
+def _press_hotkeys(key):
+    if lock_hotkey:
+        lock_hotkey.press(key)
+    if unlock_hotkey:
+        unlock_hotkey.press(key)
+    if emergency_hotkey:
+        emergency_hotkey.press(key)
+
+
+def _release_hotkeys(key):
+    if lock_hotkey:
+        lock_hotkey.release(key)
+    if unlock_hotkey:
+        unlock_hotkey.release(key)
+    if emergency_hotkey:
+        emergency_hotkey.release(key)
+
+
+def on_press(key):
+    """Fallback hotkey callback for non-Windows, non-macOS platforms."""
+    if shortcut_listener is not None:
+        _press_hotkeys(shortcut_listener.canonical(key))
+
+
+def on_release(key):
+    """Fallback hotkey callback for non-Windows, non-macOS platforms."""
+    if shortcut_listener is not None:
+        _release_hotkeys(shortcut_listener.canonical(key))

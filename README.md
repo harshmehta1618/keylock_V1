@@ -42,6 +42,20 @@ On Windows, Keylock allows injected keyboard and mouse events through while
 blocking non-injected local input. Remote-control apps such as UltraViewer may
 use injected events; other software that injects input may pass through too.
 
+## macOS
+
+Keylock can also run from source on macOS with Python 3.11 or newer. From the
+project directory, install the dependencies with `python3 -m pip install pynput tomli-w pyinstaller`,
+then start it with `python3 main.py`. To package it, run `sh build.sh` on the
+Mac; PyInstaller builds must be made on macOS for macOS.
+
+macOS will require granting the app (or the Terminal/Python process used to run
+it) permission under **System Settings → Privacy & Security → Accessibility**
+and **Input Monitoring**. The app must be restarted after changing permissions.
+macOS input hooks are system-wide; Keylock cannot select only the built-in
+keyboard/touchpad or reliably distinguish UltraViewer input on macOS. Test with
+an external input device available before locking.
+
 > [!Important]
 > The "Mouse lock" button is a bit buggy. When you lock only mouse, if exit shortcut has "ctrl" then you can only use a-z characters and nothing else. This is not an issue when you lock only keyboard or both.
 

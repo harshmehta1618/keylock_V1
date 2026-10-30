@@ -30,7 +30,8 @@ root = tk.Tk()
 root.geometry("360x352")
 root.configure(bg="#ffffff")
 root.title("Keylock")
-root.iconbitmap(load_asset("icon.ico"))
+window_icon = tk.PhotoImage(file=load_asset("icon.png"))
+root.iconphoto(True, window_icon)
 
 canvas = tk.Canvas(
     root,
