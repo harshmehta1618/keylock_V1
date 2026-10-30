@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pad>
+    <application>
+        <name>Keylock</name>
+        <version>v1.0.0</version>
+        <url>https://github.com/harshmehta1618/keylock_V1</url>
+        <exe_file>https://github.com/harshmehta1618/keylock_V1/releases/latest/download/keylock.exe</exe_file>
+        <description>Lock your keys with ease</description>
+        <long_description>
+            Keylock is an app with a modern and beautiful UI that allows you to lock your keyboard. You can unlock it by pressing a shortcut that you can also change.
+        </long_description>
+        <category>System Utility</category>
+        <platform>Windows</platform>
+        <license>AGPL-3.0</license>
+        <price>$0 - Free</price>
+        <author>
+            <name>Harsh Mehta (maintainer; original project by Axorax)</name>
+            <url>https://github.com/harshmehta1618/keylock_V1</url>
+        </author>
+        <features>
+            <feature>Easy to use.</feature>
+            <feature>Modern and beautiful interface.</feature>
+            <feature>Low RAM usage and file size.</feature>
+        </features>
+        <keywords>keyboards, mouse-lock, keylock, keyboard-lock</keywords>
+        <screenshots>
+            <screenshot>https://raw.githubusercontent.com/harshmehta1618/keylock_V1/main/thumbnail.png</screenshot>
+        </screenshots>
+        <icon>https://raw.githubusercontent.com/harshmehta1618/keylock_V1/main/assets/icon.png</icon>
+    </application>
+</pad>
